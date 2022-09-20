@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import os
 from flask import *
 from flask_sqlalchemy import SQLAlchemy
