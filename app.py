@@ -26,7 +26,7 @@ class MyClass(Resource):
     def get(self,id):
         pass
         # pData = Person.query.get(id)
-        # eData = Employment.query.filter_by(person_id =id).all
+        # eData = Employment.query.filter_by(person_id =id).all()
         # for i in pData:
         #     print(i)
         # print(pData.name,"---------")
@@ -39,9 +39,14 @@ class MyClass(Resource):
     def post(self):
         data = request.get_json()
         print("===============",data)
+        pData = Person.query.get(data["id"])
+        print("========",pData)
         personData = Person(id = data["id"],name = data["name"], address =data["address"])
         employmentData = Employment(employe_detail= data["employe_detail"],person_id =data["id"])
-        db.session.add_all([personData,employmentData])
+        if data["id"] != pData.id:
+            db.session.add_all([personData,employmentData])
+        else:
+            db.session.add(employmentData)
         db.session.commit()
         if data:
             return jsonify({"msg":"Sucessfully added"})
