@@ -1,4 +1,3 @@
-from ast import Try
 import os
 from flask import *
 from flask_sqlalchemy import SQLAlchemy
