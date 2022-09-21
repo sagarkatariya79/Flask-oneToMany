@@ -1,3 +1,4 @@
+from ast import Try
 import os
 from flask import *
 from flask_sqlalchemy import SQLAlchemy
@@ -21,21 +22,25 @@ class Employment(db.Model):
     person_id = db.Column(db.Integer, db.ForeignKey('person.id'))
 
 
-class MyClass(Resource):
+class MyClassget(Resource):
 
     def get(self,id):
-        pass
-        # pData = Person.query.get(id)
-        # eData = Employment.query.filter_by(person_id =id).all()
-        # for i in pData:
-        #     print(i)
-        # print(pData.name,"---------")
-        # print(eData.employe_detail,"============")
-        # return {"msg":"displayed"}
+        try:    
+            pData = Person.query.get(id)
+            print("-------------",pData)
+            eData = Employment.query.filter_by(person_id =id).all()
+            print(pData.name,"---------")
+            print(eData,"============")
+            emp = []
+            for i in eData:
+                emp.append(i.employe_detail)
+            print("eeeeeee",emp)
+            display = {"id":id,"name":pData.name , "address":pData.address,"employe_detail":emp}
+            return display , 200
+        except:
+            return {"msg":"Somthing went wrong"} ,400
 
-
-
-
+class MyClasspost(Resource):
     def post(self):
         data = request.get_json()
         print("===============",data)
@@ -43,19 +48,37 @@ class MyClass(Resource):
         print("========",pData)
         personData = Person(id = data["id"],name = data["name"], address =data["address"])
         employmentData = Employment(employe_detail= data["employe_detail"],person_id =data["id"])
-        if data["id"] != pData.id:
-            db.session.add_all([personData,employmentData])
-        else:
+        if pData.id:
             db.session.add(employmentData)
+        else:
+            db.session.add_all([personData,employmentData])
         db.session.commit()
         if data:
-            return jsonify({"msg":"Sucessfully added"})
-        return jsonify({"msg":"some error occers"})
+            return {"msg":"Sucessfully added"} , 201
+        return {"msg":"some error occers"} , 400
 
 
 
-api.add_resource(MyClass,"/person")
-# api.add_resource(MyClass,"/person/<int:id>")
+class AllDataclass(Resource):
+    def get(self):
+        pData = Person.query.all()
+       
+        allData = {}
+        for i in pData:
+            display = {}
+            eData = Employment.query.filter_by(person_id =i.id).all()
+            emp = []
+            for j in eData:
+                emp.append(j.employe_detail)
+            display = {"id":i.id,"name":i.name , "address":i.address,"employe_detail":emp}
+            allData[i.id] = display
+        print(allData)
+        return allData , 200
+
+
+api.add_resource(AllDataclass,"/all")
+api.add_resource(MyClasspost,"/personpost")
+api.add_resource(MyClassget,"/personget/<int:id>")
 
 
 if __name__=='__main__':
